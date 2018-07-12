@@ -153,9 +153,10 @@ class SearchBox extends Widget {
   handleChange(event) {
     if (event) {
       let selectedValue = event;
+      let selectedComponent ={selectedComponent:selectedValue};
       this.setState({ selectedOption: selectedValue });
       this.publishedMsgSet.push({ time: new Date(), value: selectedValue });
-      super.publish(selectedValue);
+      super.publish(JSON.stringify(selectedComponent));
     }
   }
 
