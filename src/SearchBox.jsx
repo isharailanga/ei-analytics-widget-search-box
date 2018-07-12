@@ -87,6 +87,7 @@ const customStyles = {
 };
 
 
+
 class SearchBox extends Widget {
 
   constructor(props) {
@@ -98,13 +99,39 @@ class SearchBox extends Widget {
     this.publishedMsgSet = [];
     this.handleChange = this.handleChange.bind(this);
     this.handleDataReceived = this.handleDataReceived.bind(this);
+    this.getCurrentPage = this.getCurrentPage.bind(this);
 
   }
 
+  getCurrentPage() {
+    var pageName;
+    var href = parent.window.location.href;
+    var lastSegment = href.substr(href.lastIndexOf('/') + 1);
+    if (lastSegment.indexOf('?') == -1) {
+      pageName = lastSegment;
+    } else {
+      pageName = lastSegment.substr(0, lastSegment.indexOf('?'));
+    }
+    return pageName;
+  }
+
   componentDidMount() {
+
+    let query;
+    let pgAPI = 'api'; let pgEndpoint = 'endpoint'; let pgProxy = 'proxy';
+    let pageName = this.getCurrentPage();
+
     super.getWidgetConfiguration(this.props.widgetID)
       .then((message) => {
-        super.getWidgetChannelManager().subscribeWidget(this.props.id, this.handleDataReceived, message.data.configs.providerConfig);
+        if (pageName == pgAPI || pageName == pgProxy || pageName == pgEndpoint) {
+          query = message.data.configs.providerConfig.configs.config.queryData.queryESB;
+          message.data.configs.providerConfig.configs.config.queryData.query = query;
+          super.getWidgetChannelManager().subscribeWidget(this.props.id, this.handleDataReceived, message.data.configs.providerConfig);
+        } else {
+          query = message.data.configs.providerConfig.configs.config.queryData.queryMediator;
+          message.data.configs.providerConfig.configs.config.queryData.query = query;
+          super.getWidgetChannelManager().subscribeWidget(this.props.id, this.handleDataReceived, message.data.configs.providerConfig);
+        }
       })
       .catch((error) => {
         this.setState({
@@ -120,16 +147,13 @@ class SearchBox extends Widget {
         label: suggestion[0],
       }))
     });
-    console.log(JSON.stringify(this.state.optionArray));
-
   }
 
 
-  handleChange(e) {
-    if (e) {
-      let selectedValue = e;
+  handleChange(event) {
+    if (event) {
+      let selectedValue = event;
       this.setState({ selectedOption: selectedValue });
-      console.log(`selectedOption:` + this.state.selectedOption);
       this.publishedMsgSet.push({ time: new Date(), value: selectedValue });
       super.publish(selectedValue);
     }
@@ -137,7 +161,6 @@ class SearchBox extends Widget {
 
 
   render() {
-
     return (
       <div>
         <Select

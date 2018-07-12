@@ -12,22 +12,11 @@
       "configs": {
         "type": "SiddhiStoreDataProvider",
         "config": {
-          "siddhiApp": "@App:name(\"EIStatApp-ESB-ComponentNames\") @App:description(\"Aggregation for ESBStat\") @sink(type = \"log\", prefix = \"ESBStatStreamTemp\") define stream ESBStatStreamTemp (componentId string, componentName string, componentType string, duration long, faultCount int, startTime long, entryPoint string, meta_tenantId int); @store(type = \"rdbms\", datasource = \"EI_ANALYTICS\") @info(name = \"ESBStat\") define aggregation ESBStat from ESBStatStreamTemp select componentId, componentName, componentType, sum(duration) as totalDuration, min(duration) as minDuration, max(duration) as maxDuration, count() as noOfInvocation, sum(faultCount) as faultCount, entryPoint, meta_tenantId, startTime as _timestamp group by  meta_tenantId, componentId, componentName, componentType, entryPoint aggregate by startTime every seconds...years;"
-          ,
+          "siddhiApp": "@App:name(\"EIStatApp-ESB-ComponentNames\") @App:description(\"Aggregation for ESBStat\") @sink(type = \"log\", prefix = \"ESBStatStreamTemp\") define stream ESBStatStreamTemp (componentId string, componentName string, componentType string, duration long, faultCount int, startTime long, entryPoint string, meta_tenantId int); @store(type = \"rdbms\", datasource = \"EI_ANALYTICS\") @info(name = \"ESBStat\") define aggregation ESBStat from ESBStatStreamTemp select componentId, componentName, componentType, sum(duration) as totalDuration, min(duration) as minDuration, max(duration) as maxDuration, count() as noOfInvocation, sum(faultCount) as faultCount, entryPoint, meta_tenantId, startTime as _timestamp group by  meta_tenantId, componentId, componentName, componentType, entryPoint aggregate by startTime every seconds...years;  @sink(type = \"log\", prefix = \"MediatorStatStreamTemp\") define stream MediatorStatStreamTemp (meta_tenantId int, entryPoint string, entryPointHashcode string, componentId string, hashCode string, componentName string, componentType string, duration long, faultCount int, startTime long); @store(type = \"rdbms\", datasource = \"EI_ANALYTICS\") @info(name = \"MediatorStat\") define aggregation MediatorStat from MediatorStatStreamTemp select meta_tenantId, entryPoint, entryPointHashcode, componentId, hashCode, componentName, componentType, sum(duration) as totalDuration, min(duration) as minDuration, max(duration) as maxDuration, count() as noOfInvocation, sum(faultCount) as faultCount, startTime group by meta_tenantId, componentId, componentName, componentType, entryPoint, entryPointHashcode, hashCode aggregate by startTime every sec ... years;",
           "queryData": {
-            "query": "from ESBStat_MINUTES select componentName"
-          },
-          "publishingInterval": 60
-        }
-      }
-    },
-    "providerConfig2": {
-      "configs": {
-        "type": "SiddhiStoreDataProvider",
-        "config": {
-          "siddhiApp": "@App:name(\"EIStatApp-Mediator-ComponentNames\") @App:description(\"Aggregation for MediatorStat\") @sink(type = \"log\", prefix = \"MediatorStatStreamTemp\") define stream MediatorStatStreamTemp (meta_tenantId int, entryPoint string, entryPointHashcode string, componentId string, hashCode string, componentName string, componentType string, duration long, faultCount int, startTime long); @store(type = \"rdbms\", datasource = \"EI_ANALYTICS\") @info(name = \"MediatorStat\") define aggregation MediatorStat from MediatorStatStreamTemp select meta_tenantId, entryPoint, entryPointHashcode, componentId, hashCode, componentName, componentType, sum(duration) as totalDuration, min(duration) as minDuration, max(duration) as maxDuration, count() as noOfInvocation, sum(faultCount) as faultCount, startTime group by meta_tenantId, componentId, componentName, componentType, entryPoint, entryPointHashcode, hashCode aggregate by startTime every sec ... years;",
-          "queryData": {
-            "query": "from MediatorStat_MINUTES select componentName"
+            "query": "",
+            "queryESB": "from ESBStat_MINUTES select componentName group by componentName",
+            "queryMediator":"from MediatorStat_MINUTES select componentName group by componentName"
           },
           "publishingInterval": 60
         }
