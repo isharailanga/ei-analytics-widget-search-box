@@ -125,13 +125,11 @@ class SearchBox extends Widget {
       .then((message) => {
         if (pageName == pgAPI || pageName == pgProxy || pageName == pgEndpoint) {
           query = message.data.configs.providerConfig.configs.config.queryData.queryESB;
-          message.data.configs.providerConfig.configs.config.queryData.query = query;
-          super.getWidgetChannelManager().subscribeWidget(this.props.id, this.handleDataReceived, message.data.configs.providerConfig);
         } else {
           query = message.data.configs.providerConfig.configs.config.queryData.queryMediator;
-          message.data.configs.providerConfig.configs.config.queryData.query = query;
-          super.getWidgetChannelManager().subscribeWidget(this.props.id, this.handleDataReceived, message.data.configs.providerConfig);
         }
+        message.data.configs.providerConfig.configs.config.queryData.query = query.replace('{{paramComponentType}}', '\'' + pageName + '\'');
+        super.getWidgetChannelManager().subscribeWidget(this.props.id, this.handleDataReceived, message.data.configs.providerConfig);
       })
       .catch((error) => {
         this.setState({
@@ -153,10 +151,10 @@ class SearchBox extends Widget {
   handleChange(event) {
     if (event) {
       let selectedValue = event;
-      let selectedComponent ={selectedComponent:selectedValue};
+      let selectedComponent = { selectedComponent: selectedValue };
       this.setState({ selectedOption: selectedValue });
       this.publishedMsgSet.push({ time: new Date(), value: selectedValue });
-      super.publish(JSON.stringify(selectedComponent));
+      super.publish(selectedComponent);
     }
   }
 
