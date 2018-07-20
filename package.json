@@ -12,6 +12,7 @@
         "style-loader": "^0.21.0"
     },
     "scripts": {
+        "build": "webpack -p",
         "build-dev": "webpack -d --config webpack.config.js --watch --progress"
     },
     "devDependencies": {
