@@ -6,6 +6,9 @@
     "pubsub": {
       "types": [
         "publisher"
+      ],
+      "publisherWidgetOutputs":[
+        "selectedComponent"
       ]
     },
     "providerConfig": {
