@@ -18,10 +18,16 @@ class SearchBox extends Widget {
     this.excludeComponets = this.excludeComponets.bind(this);
     this.publishMessage = this.publishMessage.bind(this);
     this.pageName = this.getCurrentPage();
-    this.pgAPI = 'api';
-    this.pgEndpoint = 'endpoint';
-    this.pgProxy = 'proxy';
-    this.pgSequence = 'sequence';
+    // this.pgAPI = "api";
+    // this.pgEndpoint = "endpoint";
+    // this.pgProxy = "proxy service";
+    // this.pgSequence = "sequence";
+    // this.pgInbound= "inbound endpoint";
+    this.pgAPI = 'API';
+    this.pgEndpoint = 'Endpoint';
+    this.pgProxy = 'Proxy Service';
+    this.pgSequence = 'Sequence';
+    this.pgInbound= 'Inbound Endpoint';
   }
 
 
@@ -31,16 +37,17 @@ class SearchBox extends Widget {
     let lastSegment = href.substr(href.lastIndexOf('/') + 1);
     if (lastSegment.indexOf('?') == -1) {
       pageName = lastSegment;
+
     } else {
       pageName = lastSegment.substr(0, lastSegment.indexOf('?'));
     }
     return pageName;
   }
 
-  componentDidMount() {
-
+  componentDidMount() {   
     let query;
 
+    // if a component is already selected, preserve the selection
     var urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('id')) {
       let selectedComp = this.getUrlParameter('id');
@@ -49,13 +56,15 @@ class SearchBox extends Widget {
 
     super.getWidgetConfiguration(this.props.widgetID)
       .then((message) => {
-        if (this.pageName == this.pgAPI || this.pageName == this.pgProxy || this.pageName == this.pgEndpoint) {
+        //based on the component type, query ESB or Mediator stat tables
+        if (this.pageName == this.pgAPI.toLowerCase() || this.pageName == this.pgProxy.toLowerCase() || this.pageName == this.pgInbound.toLowerCase()) {
           query = message.data.configs.providerConfig.configs.config.queryData.queryESB;
         } else {
           query = message.data.configs.providerConfig.configs.config.queryData.queryMediator;
         }
         message.data.configs.providerConfig.configs.config.queryData.query = query.replace('{{paramComponentType}}', '\'' + this.pageName + '\'');
         super.getWidgetChannelManager().subscribeWidget(this.props.id, this.handleDataReceived, message.data.configs.providerConfig);
+      
       })
       .catch((error) => {
         this.setState({
@@ -71,12 +80,14 @@ class SearchBox extends Widget {
         return nameArr[0];
       });
 
-    if (this.pageName == this.pgEndpoint) {
-      let excludeSequences = ["AnonymousEndpoint"];
-      this.excludeComponets(componentNameArr, excludeSequences);
+    // remove endpoints in the excludeEndpoints-array from the options
+    if (this.pageName == this.pgEndpoint.toLowerCase()) {
+      let excludeEndpoints = ["AnonymousEndpoint"];
+      this.excludeComponets(componentNameArr, excludeEndpoints);
     }
 
-    else if (this.pageName == this.pgSequence) {
+     // remove sequences in the excludeSequences-array from the options
+    else if (this.pageName == this.pgSequence.toLowerCase()) {
       let excludeSequences = ["PROXY_INSEQ", "PROXY_OUTSEQ", "PROXY_FAULTSEQ", "API_OUTSEQ", "API_INSEQ", "API_FAULTSEQ", "AnonymousSequence"];
       this.excludeComponets(componentNameArr, excludeSequences);
     }
@@ -89,17 +100,18 @@ class SearchBox extends Widget {
     });
   }
 
-
-  excludeComponets(componentNameArr, excludeSequences) {
+  //remove an array of elements from an array
+  excludeComponets(componentNameArr, excludeItems) {
     let item;
-    for (item in excludeSequences) {
-      let exSeq = excludeSequences[item];
+    for (item in excludeItems) {
+      let exSeq = excludeItems[item];
       let index = componentNameArr.indexOf(exSeq);
       if (index > -1) {
         componentNameArr.splice(index, 1);
       }
     }
   }
+
   getUrlParameter(name) {
     name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
     var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -114,6 +126,7 @@ class SearchBox extends Widget {
     }
   }
 
+  //publish the given message as an object
   publishMessage(pubMessage) {
     this.setState({ selectedOption: pubMessage });
     let selectedComponent = { "selectedComponent": pubMessage };
